@@ -1,0 +1,39 @@
+services:
+  filestoring:
+    build: ./FileStoring
+    container_name: filestoring
+    ports:
+      - "5001:5001"
+    environment:
+      - DB_PATH=/data/storing.db
+    volumes:
+      - filestoring_data:/data
+
+  fileanalysis:
+    build: ./FileAnalysis
+    container_name: fileanalysis
+    ports:
+      - "5002:5002"
+    environment:
+      - FILESTORING_URL=http://filestoring:5001
+    volumes:
+      - fileanalysis_data:/data
+    depends_on:
+      - filestoring
+
+  gateway:
+    build: ./Gateway
+    container_name: gateway
+    ports:
+      - "8080:5000"
+    environment:
+      - FILESTORING_URL=http://filestoring:5001
+      - FILEANALYSIS_URL=http://fileanalysis:5002
+    depends_on:
+      - filestoring
+      - fileanalysis
+
+volumes:
+  filestoring_data:
+  fileanalysis_data:
+
